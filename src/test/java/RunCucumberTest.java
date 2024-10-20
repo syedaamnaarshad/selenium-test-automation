@@ -10,7 +10,8 @@ import org.junit.runner.RunWith;
                 "json:test-output/cucumber.json",
                 "html:test-output/cucumber-reports.html",
                 "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"},
-        monochrome = true )
+        monochrome = true)
+
 public class RunCucumberTest {
 
 }

@@ -17,7 +17,9 @@ public class PracticeForm extends BaseClass {
     By firstNameField=By.id("firstName");
     By lastNameField=By.id("lastName");
     By emailAddressField=By.cssSelector("input[placeholder='name@example.com']");
-    By genderField=By.xpath("//label[text()='Female']");
+    By genderFemaleField=By.xpath("//label[text()='Female']");
+    By genderMaleField=By.xpath("//label[text()='Male']");
+    By genderOtherField=By.xpath("//label[text()='Other']");
     By mobNumField=By.cssSelector("#userNumber");
     By dobField=By.id("dateOfBirthInput");
     By dobMonthField= By.cssSelector("select.react-datepicker__month-select");
@@ -31,11 +33,14 @@ public class PracticeForm extends BaseClass {
     By submitFormField=By.cssSelector("button[id='submit']");
     By actualMessageField=By.cssSelector("#example-modal-sizes-title-lg");
 
+    //reading config file
     public static Properties myProp = ConfigUtil.getConfig("config");
-        //functions of practice form
-        public PracticeForm(WebDriver driver) {
+    //constructor
+    public PracticeForm(WebDriver driver) {
             super(driver);
         }
+
+    //functions of practice form
         public void setFullName(String firstname, String lastname) {
             //first name
             WebElement firstName = driver.findElement(firstNameField);
@@ -50,14 +55,26 @@ public class PracticeForm extends BaseClass {
             WebElement email = driver.findElement(emailAddressField);
             email.sendKeys(emailAddress);
         }
-        public void clickOnGender() {
-            //gender
+        public void clickOnGender(String gender) {
+            //gender selection
             Actions actions = new Actions(driver);
-            WebElement genderFemaleRadioButton = driver.findElement(genderField);
-            actions.moveToElement(genderFemaleRadioButton).click();
             WebDriverWait w = new WebDriverWait(driver, Duration.ofSeconds(10));
-            w.until(ExpectedConditions.visibilityOf(genderFemaleRadioButton));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", genderFemaleRadioButton);
+            if (gender.equals("Male")) {
+                WebElement maleRadioButton = driver.findElement(genderMaleField);
+                actions.moveToElement(maleRadioButton).click();
+                w.until(ExpectedConditions.visibilityOf(maleRadioButton));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", maleRadioButton);
+            } else if (gender.equals("Female")) {
+                WebElement femaleRadioButton =driver.findElement(genderFemaleField);
+                actions.moveToElement(femaleRadioButton).click();
+                w.until(ExpectedConditions.visibilityOf(femaleRadioButton));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", femaleRadioButton);
+            } else {
+                WebElement otherRadioButton =driver.findElement(genderOtherField);
+                actions.moveToElement(otherRadioButton).click();
+                w.until(ExpectedConditions.visibilityOf(otherRadioButton));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", otherRadioButton);
+            }
         }
         public void setMobileNum(String mobileNumber) {
             //mobile number
@@ -78,7 +95,8 @@ public class PracticeForm extends BaseClass {
             Select selectYear = new Select(dobYearSelector);
             selectYear.selectByVisibleText(year);
             WebElement dobDaySelector = driver.findElement(By.xpath("//div[contains(@class, 'react-datepicker__day--0" + day +"') and not(contains(@class, 'react-datepicker__day--outside-month'))]"));
-            dobDaySelector.click();
+            wait.until(ExpectedConditions.visibilityOf(dobDaySelector));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dobDaySelector);
         }
         public void setSubject(String subject1, String subject2) {
             //subject
@@ -91,37 +109,52 @@ public class PracticeForm extends BaseClass {
         public void clickOnHobbies() {
             //hobbies
             WebElement hobbiesCheckbox = driver.findElement(checkboxField);
-            WebDriverWait wait1 = new WebDriverWait(driver, Duration.ofSeconds(20));
+            WebDriverWait wait1 = new WebDriverWait(driver, Duration.ofSeconds(25));
             wait1.until(ExpectedConditions.visibilityOf(hobbiesCheckbox));
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", hobbiesCheckbox);
         }
-        public void uploadPicture(String path) {
+        public void uploadPicture(String path) throws InterruptedException {
             //picture upload
             WebElement pictureFile = driver.findElement(uploadField);
             String absoluteImagePath = Paths.get(path).toAbsolutePath().toString();
+            Thread.sleep(1000);
             pictureFile.sendKeys(absoluteImagePath);
         }
         public void setAddress(String address) {
             //address
+            Actions actions = new Actions(driver);
             WebElement currentAddress = driver.findElement(addressField);
-            currentAddress.sendKeys(address);
+            actions.moveToElement(currentAddress).sendKeys(address);
         }
-        public void setStateAndCity(String state, String city) {
+        public void setStateAndCity(String state, String city) throws InterruptedException {
             //state
+            Actions actions = new Actions(driver);
             WebElement selectState = driver.findElement(stateField);
-            selectState.sendKeys(state);
-            selectState.sendKeys(Keys.RETURN);
+            Thread.sleep(1000);
+            actions.moveToElement(selectState).sendKeys(state)
+                    .sendKeys(Keys.RETURN);
             //city
             WebElement selectCity = driver.findElement(cityField);
-            selectCity.sendKeys(city);
-            selectCity.sendKeys(Keys.RETURN);
+            Thread.sleep(1000);
+            actions.moveToElement(selectCity).sendKeys(city)
+                    .sendKeys(Keys.RETURN);
         }
-        public void submitForm() {
+        public void submitForm() throws InterruptedException {
             //submit
+            Actions actions = new Actions(driver);
             WebElement submitButton = driver.findElement(submitFormField);
-            submitButton.click();
+            Thread.sleep(1000);
+            actions.moveToElement(submitButton).click();
         }
-        public String actualSubmitMessage() {
+        public boolean isSubmitted(){
+            try {
+                WebElement confirmationMessage = driver.findElement(actualMessageField);
+                return confirmationMessage.isDisplayed();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        public String actualSubmitMessage() throws InterruptedException {
             //actualSubmitMessage
             WebElement actualMessage = driver.findElement(actualMessageField);
             return actualMessage.getText();

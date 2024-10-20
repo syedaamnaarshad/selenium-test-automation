@@ -1,5 +1,6 @@
 package stepDefinition;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -16,75 +17,97 @@ import static org.page.PracticeForm.myProp;
 public class TestPracticeForm {
     WebDriver driver;
     PracticeForm practiceForm;
-@Before
-    @Given("^I am on practice form page$")
-    public void i_am_on_practice_form_page() {
+    @Before
+    public void setup(){
+    driver = new ChromeDriver();
+    }
+    @Given("^User is on practice form page$")
+    public void user_is_on_practice_form_page() {
         driver = new ChromeDriver();
         driver.get(myProp.getProperty("weburl"));
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(20));
         practiceForm=new PracticeForm(driver);
     }
-    @When("^I enter first and last name$")
-    public void i_enter_first_and_last_name() {
+    @When("^User enters first(.*) and last name(.*)$")
+    public void user_enters_first_and_last_name(String firstName, String lastName) {
+        // Check for the placeholder <empty> in both first and last names
+        if ("<empty>".equals(firstName.trim())) {
+            firstName = "";
+        }
+        if ("<empty>".equals(lastName.trim())) {
+            lastName = "";
+        }
     //setFullName
-    practiceForm.setFullName("Amna", "Arshad");
+    practiceForm.setFullName(firstName, lastName);
     }
-    @When("^I enter email$")
-    public void i_enter_email() {
+    @When("^User enters email (.*)$")
+    public void user_enters_email(String email) {
         //setEmail
-        practiceForm.setEmail("name@example.com");
+        practiceForm.setEmail(email);
     }
-    @When("^I enter gender$")
-    public void i_enter_gender() {
+    @When("^User selects gender (.*)$")
+    public void user_selects_gender(String gender) {
         //setGender
-        practiceForm.clickOnGender();
+        practiceForm.clickOnGender(gender);
     }
-    @When("^I enter mobileNum$")
-    public void i_enter_mobileNum() {
+    @When("^User enters (.*) mobileNum$")
+    public void user_enters_mobileNum(String mobNum) {
         //mobileNum
-        practiceForm.setMobileNum("0123456789");
+        practiceForm.setMobileNum(mobNum);
     }
-    @When("^I enter dob$")
-    public void i_enter_dob() {
+    @When("^User enters dob$")
+    public void user_enters_dob() {
         //dob
-        practiceForm.setDOB("May", "2000", "15");
+        practiceForm.setDOB("May","2000","15");
     }
-    @When("^I enter subject$")
-    public void i_enter_subject() {
+    @When("^User enters subject (.*),(.*)$")
+    public void user_enters_subject(String sub1, String sub2) {
         //subject
-        practiceForm.setSubject("Computer Science", "Maths");
+        practiceForm.setSubject(sub1,sub2);
     }
-    @When("^I enter hobbies$")
-    public void i_enter_hobbies() {
+    @When("^User selects hobbies$")
+    public void user_selects_hobbies() {
         //hobbies
         practiceForm.clickOnHobbies();
     }
-    @When("^I upload picture$")
-    public void i_upload_picture() {
+    @When("^User upload picture (.*)$")
+    public void user_upload_picture(String path) throws InterruptedException {
         //upload
-        practiceForm.uploadPicture("src/test/resources/picture.webp");
+        practiceForm.uploadPicture(path);
     }
-    @When("^I enter current address$")
-    public void i_enter_current_address() {
+    @When("^User enters current address (.*)$")
+    public void user_enters_current_address(String address) throws InterruptedException {
         //address
-        practiceForm.setAddress("abc street");
+        practiceForm.setAddress(address);
     }
-    @When("^I enter state and city$")
-    public void i_enter_state_and_city() {
+    @When("^User enters state and city (.*),(.*)$")
+    public void user_enters_state_and_city(String state, String city) throws InterruptedException {
         //state and city
-        practiceForm.setStateAndCity("Rajasthan", "Jaipur");
+        practiceForm.setStateAndCity(state,city);
     }
-    @Then("^Form should be submitted successfully$")
-    public void form_should_be_submitted_successfully() {
+    @When("^User clicks the submit button$")
+    public void user_clicks_the_submit_button() throws InterruptedException {
         //submit
         practiceForm.submitForm();
-        //assert the message
+    }
+    @Then("^Form should be submitted successfully$")
+    public void form_should_be_submitted_successfully() throws InterruptedException {
+        //assert the submit message by comparing
         Assert.assertEquals("Form submission", "Thanks for submitting the form", practiceForm.actualSubmitMessage());
         System.out.println(practiceForm.actualSubmitMessage());
+        driver.quit();
     }
-@After
+    @Then("Form should not be submitted successfully")
+    public void form_should_not_be_submitted_successfully() {
+        //assert the submit message
+        Assert.assertFalse(practiceForm.isSubmitted());
+        driver.quit();
+    }
+    @After
     public void tearDown() {
-       driver.quit();
+        if(driver!=null) {
+            driver.quit();
+        }
     }
 }
